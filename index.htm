@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Супер Хрестики-Нулики</title>
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --bg: #0f0c29;
+            --glass: rgba(255, 255, 255, 0.1);
+            --text: #ffffff;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: var(--text);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        #app {
+            width: 100%;
+            max-width: 600px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .card {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            border: 1px solid rgba(255,255,255,0.1);
+            animation: fadeIn 0.5s ease;
+        }
+
+        h1 { margin-bottom: 10px; font-size: 2rem; text-shadow: 0 0 10px var(--primary); }
+
+        /* Scoreboard */
+        .scoreboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        .score-item {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--secondary);
+        }
+
+        /* Characters */
+        .grid-chars {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .char-card {
+            cursor: pointer;
+            transition: transform 0.3s, border 0.3s;
+            border: 3px solid transparent;
+            border-radius: 15px;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+        }
+        .char-card:hover { transform: scale(1.05); background: rgba(255,255,255,0.1); }
+        .char-card.selected { border-color: var(--primary); background: var(--glass); }
+        .char-card img { width: 80px; height: 80px; object-fit: contain; border-radius: 50%; }
+
+        /* Sizes & Buttons */
+        .btn-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 20px 0;
+        }
+        button {
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        button:hover { background: var(--secondary); transform: translateY(-2px); }
+        .btn-reset { background: #ff7675; margin-top: 20px; }
+
+        /* Game Board */
+        .game-board {
+            display: grid;
+            gap: 5px;
+            margin: 20px auto;
+            max-width: 90vw;
+            background: rgba(255,255,255,0.1);
+            padding: 5px;
+            border-radius: 10px;
+        }
+        .cell {
+            aspect-ratio: 1/1;
+            background: rgba(15, 12, 41, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .cell.taken { cursor: default; }
+        .cell img { width: 80%; height: 80%; object-fit: contain; }
+
+        /* Modal / Pause */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <div id="screen-menu" class="card">
+        <h1>Tic Tac Love</h1>
+        <div class="scoreboard" id="scoreboard">
+            </div>
+        <button onclick="showScreen('screen-char')">Почати Гру</button>
+        <button class="btn-reset" onclick="resetAllProgress()">Скинути весь прогрес</button>
+    </div>
+
+    <div id="screen-char" class="card hidden">
+        <h2>Обери свого героя</h2>
+        <div class="grid-chars" id="char-list">
+            <div class="char-card" onclick="selectHero('Tito')">
+                <img src="Tito.png" alt="Tito">
+                <p>Тіто</p>
+            </div>
+            <div class="char-card" onclick="selectHero('Smartik')">
+                <img src="Smartik.png" alt="Smartik">
+                <p>Смартик</p>
+            </div>
+            <div class="char-card" onclick="selectHero('Junior')">
+                <img src="Junior.png" alt="Junior">
+                <p>Джуніор</p>
+            </div>
+            <div class="char-card" onclick="selectHero('Fil')">
+                <img src="Fil.png" alt="Fil">
+                <p>Філ</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-size" class="card hidden">
+        <h2>Обери розмір поля</h2>
+        <div class="btn-grid" id="size-list">
+            </div>
+    </div>
+
+    <div id="screen-side" class="card hidden">
+        <h2>Ким будеш грати?</h2>
+        <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
+            <button style="font-size: 2rem; width: 80px;" onclick="setSide('X')">X</button>
+            <button style="font-size: 2rem; width: 80px; background: #00cec9;" onclick="setSide('O')">O</button>
+        </div>
+    </div>
+
+    <div id="screen-game" class="card hidden">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span id="player-info">Ви: ?</span>
+            <button onclick="togglePause()">⏸ Пауза</button>
+            <span id="enemy-info">Робот: ?</span>
+        </div>
+        <div id="game-board" class="game-board"></div>
+        <div id="status">Твій хід!</div>
+    </div>
+</div>
+
+<div id="pause-modal" class="overlay">
+    <div class="card">
+        <h2>Пауза</h2>
+        <button onclick="togglePause()" style="width: 100%; margin-bottom: 10px;">Продовжити</button>
+        <button onclick="resetCurrentGame()" style="width: 100%; margin-bottom: 10px; background: #fab1a0;">Переграти</button>
+        <button onclick="location.reload()" style="width: 100%; background: #ff7675;">Вийти в меню</button>
+    </div>
+</div>
+
+<script>
+    const heroes = [
+        { id: 'Tito', name: 'Тіто', img: 'Tito.png' },
+        { id: 'Smartik', name: 'Смартик', img: 'Smartik.png' },
+        { id: 'Junior', name: 'Джуніор', img: 'Junior.png' },
+        { id: 'Fil', name: 'Філ', img: 'Fil.png' }
+    ];
+
+    let gameState = {
+        playerHero: null,
+        enemyHero: null,
+        boardSize: 3,
+        playerSide: 'X', // X or O
+        botSide: 'O',
+        turn: 'X',
+        board: [],
+        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0 },
+        isPaused: false,
+        gameOver: false
+    };
+
+    function init() {
+        updateScoreboard();
+        genSizeButtons();
+    }
+
+    function showScreen(screenId) {
+        document.querySelectorAll('#app > div').forEach(s => s.classList.add('hidden'));
+        document.getElementById(screenId).classList.remove('hidden');
+    }
+
+    function updateScoreboard() {
+        const sb = document.getElementById('scoreboard');
+        sb.innerHTML = heroes.map(h => `
+            <div class="score-item">
+                <strong>${h.name}:</strong> ${gameState.wins[h.id]} 🏆
+            </div>
+        `).join('');
+        localStorage.setItem('ttt_wins', JSON.stringify(gameState.wins));
+    }
+
+    function selectHero(id) {
+        gameState.playerHero = heroes.find(h => h.id === id);
+        const others = heroes.filter(h => h.id !== id);
+        gameState.enemyHero = others[Math.floor(Math.random() * others.length)];
+        showScreen('screen-size');
+    }
+
+    function genSizeButtons() {
+        const list = document.getElementById('size-list');
+        for (let i = 3; i <= 11; i++) {
+            const btn = document.createElement('button');
+            btn.innerText = `${i}x${i}`;
+            btn.onclick = () => {
+                gameState.boardSize = i;
+                showScreen('screen-side');
+            };
+            list.appendChild(btn);
+        }
+    }
+
+    function setSide(side) {
+        gameState.playerSide = side;
+        gameState.botSide = side === 'X' ? 'O' : 'X';
+        startGame();
+    }
+
+    function startGame() {
+        showScreen('screen-game');
+        gameState.gameOver = false;
+        gameState.turn = 'X';
+        gameState.board = Array(gameState.boardSize * gameState.boardSize).fill(null);
+        
+        document.getElementById('player-info').innerText = `Ви: ${gameState.playerHero.name} (${gameState.playerSide})`;
+        document.getElementById('enemy-info').innerText = `Робот: ${gameState.enemyHero.name} (${gameState.botSide})`;
+        
+        renderBoard();
+        if (gameState.botSide === 'X') setTimeout(botMove, 500);
+    }
+
+    function renderBoard() {
+        const container = document.getElementById('game-board');
+        container.style.gridTemplateColumns = `repeat(${gameState.boardSize}, 1fr)`;
+        container.innerHTML = '';
+        
+        // Dynamic cell size based on board size
+        const cellSize = Math.floor(min(400, window.innerWidth - 60) / gameState.boardSize);
+
+        gameState.board.forEach((cell, i) => {
+            const div = document.createElement('div');
+            div.className = 'cell' + (cell ? ' taken' : '');
+            div.style.width = cellSize + 'px';
+            div.style.height = cellSize + 'px';
+            div.style.fontSize = (cellSize * 0.6) + 'px';
+            
+            if (cell === 'X') div.innerHTML = `<span style="color: #ff7675">X</span>`;
+            if (cell === 'O') div.innerHTML = `<span style="color: #00cec9">O</span>`;
+            
+            div.onclick = () => playerMove(i);
+            container.appendChild(div);
+        });
+    }
+
+    function playerMove(index) {
+        if (gameState.board[index] || gameState.turn !== gameState.playerSide || gameState.gameOver) return;
+        makeMove(index, gameState.playerSide);
+        if (!gameState.gameOver) {
+            setTimeout(botMove, 500);
+        }
+    }
+
+    function botMove() {
+        if (gameState.gameOver) return;
+        const emptyIndices = gameState.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
+        if (emptyIndices.length === 0) return;
+        
+        // Проста логіка: рандом
+        const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        makeMove(move, gameState.botSide);
+    }
+
+    function makeMove(index, side) {
+        gameState.board[index] = side;
+        renderBoard();
+        
+        if (checkWin(side)) {
+            gameState.gameOver = true;
+            const winnerHero = side === gameState.playerSide ? gameState.playerHero : gameState.enemyHero;
+            document.getElementById('status').innerText = `Переміг ${winnerHero.name}!`;
+            if (side === gameState.playerSide) {
+                gameState.wins[gameState.playerHero.id]++;
+                updateScoreboard();
+            }
+            setTimeout(() => alert(`Гра завершена! Переможець: ${winnerHero.name}`), 100);
+            return;
+        }
+
+        if (!gameState.board.includes(null)) {
+            gameState.gameOver = true;
+            document.getElementById('status').innerText = "Нічия!";
+            return;
+        }
+
+        gameState.turn = side === 'X' ? 'O' : 'X';
+        document.getElementById('status').innerText = gameState.turn === gameState.playerSide ? "Твій хід!" : "Хід робота...";
+    }
+
+    function checkWin(side) {
+        const size = gameState.boardSize;
+        // Кількість в ряд для перемоги: 3 для 3х3, 4 для 4х4, 5 для більших
+        const winCondition = size === 3 ? 3 : (size === 4 ? 4 : 5);
+        const b = gameState.board;
+
+        for (let i = 0; i < b.length; i++) {
+            if (b[i] !== side) continue;
+            
+            const r = Math.floor(i / size);
+            const c = i % size;
+
+            // Напрямки: право, низ, діагональ право-вниз, діагональ ліво-вниз
+            const dirs = [[0,1], [1,0], [1,1], [1,-1]];
+            for (let [dr, dc] of dirs) {
+                let count = 1;
+                for (let step = 1; step < winCondition; step++) {
+                    const nr = r + dr * step;
+                    const nc = c + dc * step;
+                    if (nr >= 0 && nr < size && nc >= 0 && nc < size && b[nr * size + nc] === side) {
+                        count++;
+                    } else break;
+                }
+                if (count === winCondition) return true;
+            }
+        }
+        return false;
+    }
+
+    function togglePause() {
+        gameState.isPaused = !gameState.isPaused;
+        document.getElementById('pause-modal').style.display = gameState.isPaused ? 'flex' : 'none';
+    }
+
+    function resetCurrentGame() {
+        togglePause();
+        startGame();
+    }
+
+    function resetAllProgress() {
+        if (confirm("Ти впевнений, що хочеш видалити ВСІ перемоги?")) {
+            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0 };
+            updateScoreboard();
+        }
+    }
+
+    function min(a, b) { return a < b ? a : b; }
+
+    init();
+</script>
+
+</body>
+</html>
