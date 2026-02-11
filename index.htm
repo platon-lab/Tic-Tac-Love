@@ -168,6 +168,10 @@
                 <img src="Fil.png" alt="Fil">
                 <p>Філ</p>
             </div>
+            <div class="char-card" onclick="selectHero('Milka')">
+                <img src="Milka.png" alt="Fil">
+                <p>Мілка</p>
+            </div>
         </div>
     </div>
 
@@ -210,7 +214,8 @@
         { id: 'Tito', name: 'Тіто', img: 'Tito.png' },
         { id: 'Smartik', name: 'Смартик', img: 'Smartik.png' },
         { id: 'Junior', name: 'Джуніор', img: 'Junior.png' },
-        { id: 'Fil', name: 'Філ', img: 'Fil.png' }
+        { id: 'Fil', name: 'Філ', img: 'Fil.png' },
+        { id: 'Milka', name: 'Мілка', img: 'Milka.png' }
     ];
 
     let gameState = {
@@ -221,7 +226,7 @@
         botSide: 'O',
         turn: 'X',
         board: [],
-        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0 },
+        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0 },
         isPaused: false,
         gameOver: false
     };
@@ -393,7 +398,7 @@
 
     function resetAllProgress() {
         if (confirm("Ти впевнений, що хочеш видалити ВСІ перемоги?")) {
-            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0 };
+            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0 };
             updateScoreboard();
         }
     }
