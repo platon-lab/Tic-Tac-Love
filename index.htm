@@ -169,8 +169,12 @@
                 <p>Філ</p>
             </div>
             <div class="char-card" onclick="selectHero('Milka')">
-                <img src="Milka.png" alt="Fil">
+                <img src="Milka.png" alt="Milka">
                 <p>Мілка</p>
+            </div>
+            <div class="char-card" onclick="selectHero('Bark')">
+                <img src="Bark.png" alt="Bark">
+                <p>Барк</p>
             </div>
         </div>
     </div>
@@ -215,18 +219,19 @@
         { id: 'Smartik', name: 'Смартик', img: 'Smartik.png' },
         { id: 'Junior', name: 'Джуніор', img: 'Junior.png' },
         { id: 'Fil', name: 'Філ', img: 'Fil.png' },
-        { id: 'Milka', name: 'Мілка', img: 'Milka.png' }
+        { id: 'Milka', name: 'Мілка', img: 'Milka.png' },
+        { id: 'Bark', name: 'Барк', img: 'Bark.png' }
     ];
 
     let gameState = {
         playerHero: null,
         enemyHero: null,
         boardSize: 3,
-        playerSide: 'X', // X or O
+        playerSide: 'X', 
         botSide: 'O',
         turn: 'X',
         board: [],
-        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0 },
+        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0, Bark: 0 },
         isPaused: false,
         gameOver: false
     };
@@ -245,7 +250,7 @@
         const sb = document.getElementById('scoreboard');
         sb.innerHTML = heroes.map(h => `
             <div class="score-item">
-                <strong>${h.name}:</strong> ${gameState.wins[h.id]} 🏆
+                <strong>${h.name}:</strong> ${gameState.wins[h.id] || 0} 🏆
             </div>
         `).join('');
         localStorage.setItem('ttt_wins', JSON.stringify(gameState.wins));
@@ -295,7 +300,6 @@
         container.style.gridTemplateColumns = `repeat(${gameState.boardSize}, 1fr)`;
         container.innerHTML = '';
         
-        // Dynamic cell size based on board size
         const cellSize = Math.floor(min(400, window.innerWidth - 60) / gameState.boardSize);
 
         gameState.board.forEach((cell, i) => {
@@ -308,7 +312,7 @@
             if (cell === 'X') div.innerHTML = `<span style="color: #ff7675">X</span>`;
             if (cell === 'O') div.innerHTML = `<span style="color: #00cec9">O</span>`;
             
-            div.onclick = () => playerMove(i);
+            div.onclick = () => playerMove(index = i);
             container.appendChild(div);
         });
     }
@@ -326,7 +330,6 @@
         const emptyIndices = gameState.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
         if (emptyIndices.length === 0) return;
         
-        // Проста логіка: рандом
         const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
         makeMove(move, gameState.botSide);
     }
@@ -340,7 +343,7 @@
             const winnerHero = side === gameState.playerSide ? gameState.playerHero : gameState.enemyHero;
             document.getElementById('status').innerText = `Переміг ${winnerHero.name}!`;
             if (side === gameState.playerSide) {
-                gameState.wins[gameState.playerHero.id]++;
+                gameState.wins[gameState.playerHero.id] = (gameState.wins[gameState.playerHero.id] || 0) + 1;
                 updateScoreboard();
             }
             setTimeout(() => alert(`Гра завершена! Переможець: ${winnerHero.name}`), 100);
@@ -359,7 +362,6 @@
 
     function checkWin(side) {
         const size = gameState.boardSize;
-        // Кількість в ряд для перемоги: 3 для 3х3, 4 для 4х4, 5 для більших
         const winCondition = size === 3 ? 3 : (size === 4 ? 4 : 5);
         const b = gameState.board;
 
@@ -369,7 +371,6 @@
             const r = Math.floor(i / size);
             const c = i % size;
 
-            // Напрямки: право, низ, діагональ право-вниз, діагональ ліво-вниз
             const dirs = [[0,1], [1,0], [1,1], [1,-1]];
             for (let [dr, dc] of dirs) {
                 let count = 1;
@@ -398,7 +399,7 @@
 
     function resetAllProgress() {
         if (confirm("Ти впевнений, що хочеш видалити ВСІ перемоги?")) {
-            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0 };
+            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0, Bark: 0 };
             updateScoreboard();
         }
     }
