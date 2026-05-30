@@ -51,7 +51,23 @@
             gap: 10px;
             margin-bottom: 20px;
             font-size: 0.9rem;
+            max-height: 150px;
+            overflow-y: auto;
+            padding-right: 5px;
         }
+        
+        /* Custom scrollbar for scoreboard and chars */
+        .scoreboard::-webkit-scrollbar, .grid-chars::-webkit-scrollbar {
+            width: 6px;
+        }
+        .scoreboard::-webkit-scrollbar-thumb, .grid-chars::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        .scoreboard::-webkit-scrollbar-track, .grid-chars::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+        }
+
         .score-item {
             background: rgba(0,0,0,0.3);
             padding: 10px;
@@ -59,12 +75,15 @@
             border: 1px solid var(--secondary);
         }
 
-        /* Characters */
+        /* Characters container with scrolling */
         .grid-chars {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 15px;
             margin-top: 20px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding-right: 10px;
         }
         .char-card {
             cursor: pointer;
@@ -97,6 +116,7 @@
         }
         button:hover { background: var(--secondary); transform: translateY(-2px); }
         .btn-reset { background: #ff7675; margin-top: 20px; }
+        .btn-mode { background: #00cec9; margin-bottom: 10px; font-size: 1.1rem; width: 100%; }
 
         /* Game Board */
         .game-board {
@@ -143,50 +163,24 @@
 <div id="app">
     <div id="screen-menu" class="card">
         <h1>Tic Tac Love</h1>
-        <div class="scoreboard" id="scoreboard">
-            </div>
-        <button onclick="showScreen('screen-char')">Почати Гру</button>
+        <div class="scoreboard" id="scoreboard"></div>
+        <button class="btn-mode" onclick="selectMode('bot')">🤖 Грати з Роботом</button>
+        <button class="btn-mode" onclick="selectMode('friend')">👥 Грати з Другом</button>
         <button class="btn-reset" onclick="resetAllProgress()">Скинути весь прогрес</button>
     </div>
 
     <div id="screen-char" class="card hidden">
-        <h2>Обери свого героя</h2>
-        <div class="grid-chars" id="char-list">
-            <div class="char-card" onclick="selectHero('Tito')">
-                <img src="Tito.png" alt="Tito">
-                <p>Тіто</p>
-            </div>
-            <div class="char-card" onclick="selectHero('Smartik')">
-                <img src="Smartik.png" alt="Smartik">
-                <p>Смартик</p>
-            </div>
-            <div class="char-card" onclick="selectHero('Junior')">
-                <img src="Junior.png" alt="Junior">
-                <p>Джуніор</p>
-            </div>
-            <div class="char-card" onclick="selectHero('Fil')">
-                <img src="Fil.png" alt="Fil">
-                <p>Філ</p>
-            </div>
-            <div class="char-card" onclick="selectHero('Milka')">
-                <img src="Milka.png" alt="Milka">
-                <p>Мілка</p>
-            </div>
-            <div class="char-card" onclick="selectHero('Bark')">
-                <img src="Bark.png" alt="Bark">
-                <p>Барк</p>
-            </div>
-        </div>
+        <h2 id="char-screen-title">Обери свого героя</h2>
+        <div class="grid-chars" id="char-list"></div>
     </div>
 
     <div id="screen-size" class="card hidden">
         <h2>Обери розмір поля</h2>
-        <div class="btn-grid" id="size-list">
-            </div>
+        <div class="btn-grid" id="size-list"></div>
     </div>
 
     <div id="screen-side" class="card hidden">
-        <h2>Ким будеш грати?</h2>
+        <h2>Ким буде грати Гравець 1?</h2>
         <div style="display: flex; gap: 20px; justify-content: center; margin-top: 20px;">
             <button style="font-size: 2rem; width: 80px;" onclick="setSide('X')">X</button>
             <button style="font-size: 2rem; width: 80px; background: #00cec9;" onclick="setSide('O')">O</button>
@@ -220,10 +214,29 @@
         { id: 'Junior', name: 'Джуніор', img: 'Junior.png' },
         { id: 'Fil', name: 'Філ', img: 'Fil.png' },
         { id: 'Milka', name: 'Мілка', img: 'Milka.png' },
-        { id: 'Bark', name: 'Барк', img: 'Bark.png' }
+        { id: 'Bark', name: 'Барк', img: 'Bark.png' },
+        { id: 'Persik', name: 'Персік', img: 'Persik.png' },
+        { id: 'Spike', name: 'Спайк', img: 'Spike.png' },
+        { id: 'Alyonka', name: 'Альонка', img: 'Alyonka.png' },
+        { id: 'Lilu', name: 'Лілу', img: 'Lilu.png' },
+        { id: 'Manya', name: 'Маня', img: 'Manya.png' },
+        { id: 'Liza', name: 'Ліза', img: 'Liza.png' },
+        { id: 'Grivna', name: 'Гривна', img: 'Grivna.png' },
+        { id: 'Ben', name: 'Бен', img: 'Ben.png' },
+        { id: 'Goldi', name: 'Голді', img: 'Goldi.png' },
+        { id: 'Raf', name: 'Раф', img: 'Raf.png' },
+        { id: 'Veles', name: 'Велес', img: 'Veles.png' },
+        { id: 'Masha', name: 'Маша', img: 'Masha.png' },
+        { id: 'Brilliantik', name: 'Брілліантік', img: 'Brilliantik.png' },
+        { id: 'Richik', name: 'Річік', img: 'Richik.png' }
     ];
 
+    // Ініціалізація структури збереження перемог для всіх 20 героїв
+    let initialWins = {};
+    heroes.forEach(h => { initialWins[h.id] = 0; });
+
     let gameState = {
+        gameMode: 'bot', // 'bot' або 'friend'
         playerHero: null,
         enemyHero: null,
         boardSize: 3,
@@ -231,14 +244,19 @@
         botSide: 'O',
         turn: 'X',
         board: [],
-        wins: JSON.parse(localStorage.getItem('ttt_wins')) || { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0, Bark: 0 },
+        wins: JSON.parse(localStorage.getItem('ttt_wins')) || initialWins,
         isPaused: false,
         gameOver: false
     };
 
     function init() {
+        // Дозаповнення, якщо збережені старі дані без нових героїв
+        heroes.forEach(h => {
+            if (gameState.wins[h.id] === undefined) gameState.wins[h.id] = 0;
+        });
         updateScoreboard();
         genSizeButtons();
+        renderCharList();
     }
 
     function showScreen(screenId) {
@@ -256,20 +274,59 @@
         localStorage.setItem('ttt_wins', JSON.stringify(gameState.wins));
     }
 
+    function renderCharList() {
+        const list = document.getElementById('char-list');
+        list.innerHTML = heroes.map(h => `
+            <div class="char-card" id="card-${h.id}" onclick="selectHero('${h.id}')">
+                <img src="${h.img}" alt="${h.name}">
+                <p>${h.name}</p>
+            </div>
+        `).join('');
+    }
+
+    function selectMode(mode) {
+        gameState.gameMode = mode;
+        gameState.playerHero = null;
+        gameState.enemyHero = null;
+        document.getElementById('char-screen-title').innerText = mode === 'friend' ? "Гравець 1: Обери свого героя" : "Обери свого героя";
+        showScreen('screen-char');
+    }
+
     function selectHero(id) {
-        gameState.playerHero = heroes.find(h => h.id === id);
-        const others = heroes.filter(h => h.id !== id);
-        gameState.enemyHero = others[Math.floor(Math.random() * others.length)];
-        showScreen('screen-size');
+        if (!gameState.playerHero) {
+            gameState.playerHero = heroes.find(h => h.id === id);
+            if (gameState.gameMode === 'bot') {
+                const others = heroes.filter(h => h.id !== id);
+                gameState.enemyHero = others[Math.floor(Math.random() * others.length)];
+                showScreen('screen-size');
+            } else {
+                document.getElementById('char-screen-title').innerText = "Гравець 2: Обери свого героя";
+                // Тимчасово підсвітимо або приховаємо обраного першого героя, щоб не вибрати двічі
+                document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+                document.getElementById(`card-${id}`).style.opacity = '0.4';
+            }
+        } else if (gameState.gameMode === 'friend' && !gameState.enemyHero) {
+            if (gameState.playerHero.id === id) return; // Не можна обирати одного й того самого
+            gameState.enemyHero = heroes.find(h => h.id === id);
+            // Повертаємо прозорість назад
+            document.querySelectorAll('.char-card').forEach(c => c.style.opacity = '1');
+            showScreen('screen-size');
+        }
     }
 
     function genSizeButtons() {
         const list = document.getElementById('size-list');
+        list.innerHTML = '';
         for (let i = 3; i <= 11; i++) {
             const btn = document.createElement('button');
             btn.innerText = `${i}x${i}`;
             btn.onclick = () => {
                 gameState.boardSize = i;
+                if (gameState.gameMode === 'friend') {
+                    document.querySelector('#screen-side h2').innerText = `Ким гратиме ${gameState.playerHero.name}?`;
+                } else {
+                    document.querySelector('#screen-side h2').innerText = "Ким будеш грати?";
+                }
                 showScreen('screen-side');
             };
             list.appendChild(btn);
@@ -288,11 +345,27 @@
         gameState.turn = 'X';
         gameState.board = Array(gameState.boardSize * gameState.boardSize).fill(null);
         
-        document.getElementById('player-info').innerText = `Ви: ${gameState.playerHero.name} (${gameState.playerSide})`;
-        document.getElementById('enemy-info').innerText = `Робот: ${gameState.enemyHero.name} (${gameState.botSide})`;
+        if (gameState.gameMode === 'bot') {
+            document.getElementById('player-info').innerText = `Ви: ${gameState.playerHero.name} (${gameState.playerSide})`;
+            document.getElementById('enemy-info').innerText = `Робот: ${gameState.enemyHero.name} (${gameState.botSide})`;
+        } else {
+            document.getElementById('player-info').innerText = `${gameState.playerHero.name} (${gameState.playerSide})`;
+            document.getElementById('enemy-info').innerText = `${gameState.enemyHero.name} (${gameState.botSide})`;
+        }
         
         renderBoard();
-        if (gameState.botSide === 'X') setTimeout(botMove, 500);
+        updateStatusText();
+        if (gameState.gameMode === 'bot' && gameState.botSide === 'X') setTimeout(botMove, 500);
+    }
+
+    function updateStatusText() {
+        const status = document.getElementById('status');
+        if (gameState.gameMode === 'bot') {
+            status.innerText = gameState.turn === gameState.playerSide ? "Твій хід!" : "Хід робота...";
+        } else {
+            const currentHero = gameState.turn === gameState.playerSide ? gameState.playerHero.name : gameState.enemyHero.name;
+            status.innerText = `Хід: ${currentHero} (${gameState.turn})`;
+        }
     }
 
     function renderBoard() {
@@ -312,24 +385,62 @@
             if (cell === 'X') div.innerHTML = `<span style="color: #ff7675">X</span>`;
             if (cell === 'O') div.innerHTML = `<span style="color: #00cec9">O</span>`;
             
-            div.onclick = () => playerMove(index = i);
+            div.onclick = () => playerMove(i);
             container.appendChild(div);
         });
     }
 
     function playerMove(index) {
-        if (gameState.board[index] || gameState.turn !== gameState.playerSide || gameState.gameOver) return;
-        makeMove(index, gameState.playerSide);
-        if (!gameState.gameOver) {
-            setTimeout(botMove, 500);
+        if (gameState.board[index] || gameState.gameOver) return;
+        
+        if (gameState.gameMode === 'bot') {
+            if (gameState.turn !== gameState.playerSide) return;
+            makeMove(index, gameState.playerSide);
+            if (!gameState.gameOver) {
+                setTimeout(botMove, 500);
+            }
+        } else {
+            // Режим з другом
+            makeMove(index, gameState.turn);
         }
     }
 
+    // Розумний ШІ з аналізом ліній для перемоги або блокування
     function botMove() {
         if (gameState.gameOver) return;
         const emptyIndices = gameState.board.map((v, i) => v === null ? i : null).filter(v => v !== null);
         if (emptyIndices.length === 0) return;
-        
+
+        // 1. Перевірка, чи може бот виграти за один хід
+        for (let i of emptyIndices) {
+            gameState.board[i] = gameState.botSide;
+            if (checkWin(gameState.botSide)) {
+                gameState.board[i] = null; // Повертаємо стан
+                makeMove(i, gameState.botSide);
+                return;
+            }
+            gameState.board[i] = null;
+        }
+
+        // 2. Перевірка, чи може гравець виграти за один хід (Блокування гравця)
+        for (let i of emptyIndices) {
+            gameState.board[i] = gameState.playerSide;
+            if (checkWin(gameState.playerSide)) {
+                gameState.board[i] = null;
+                makeMove(i, gameState.botSide);
+                return;
+            }
+            gameState.board[i] = null;
+        }
+
+        // 3. Якщо немає критичних ходів, займаємо центр (для малих полів) або робимо рандомний крок
+        const center = Math.floor(gameState.boardSize * gameState.boardSize / 2);
+        if (emptyIndices.includes(center) && gameState.boardSize <= 4) {
+            makeMove(center, gameState.botSide);
+            return;
+        }
+
+        // Випадковий розумний хід
         const move = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
         makeMove(move, gameState.botSide);
     }
@@ -342,10 +453,11 @@
             gameState.gameOver = true;
             const winnerHero = side === gameState.playerSide ? gameState.playerHero : gameState.enemyHero;
             document.getElementById('status').innerText = `Переміг ${winnerHero.name}!`;
-            if (side === gameState.playerSide) {
-                gameState.wins[gameState.playerHero.id] = (gameState.wins[gameState.playerHero.id] || 0) + 1;
-                updateScoreboard();
-            }
+            
+            // Зараховуємо бал переможцю
+            gameState.wins[winnerHero.id] = (gameState.wins[winnerHero.id] || 0) + 1;
+            updateScoreboard();
+            
             setTimeout(() => alert(`Гра завершена! Переможець: ${winnerHero.name}`), 100);
             return;
         }
@@ -357,7 +469,7 @@
         }
 
         gameState.turn = side === 'X' ? 'O' : 'X';
-        document.getElementById('status').innerText = gameState.turn === gameState.playerSide ? "Твій хід!" : "Хід робота...";
+        updateStatusText();
     }
 
     function checkWin(side) {
@@ -399,7 +511,8 @@
 
     function resetAllProgress() {
         if (confirm("Ти впевнений, що хочеш видалити ВСІ перемоги?")) {
-            gameState.wins = { Tito: 0, Smartik: 0, Junior: 0, Fil: 0, Milka: 0, Bark: 0 };
+            gameState.wins = {};
+            heroes.forEach(h => { gameState.wins[h.id] = 0; });
             updateScoreboard();
         }
     }
